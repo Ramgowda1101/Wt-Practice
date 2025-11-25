@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Update Book</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>📖 Update Book Details</h1>
+    <nav>
+      <a href="index.html">🏠 Home</a>
+      <a href="addBook.html">➕ Add Book</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="form-section">
+      <h2>Edit Book Information</h2>
+      <form id="updateBookForm" class="book-form">
+        <label for="title">Title:</label>
+        <input type="text" id="title" required />
+
+        <label for="author">Author:</label>
+        <input type="text" id="author" required />
+
+        <label for="year">Year:</label>
+        <input type="number" id="year" required />
+        
+        <label for="price">Price:</label>
+        <input type="number" id="price" required />
+
+        <label>Book Image:</label><br />
+        <img id="previewImage" src="" alt="Book Image" width="150" style="border-radius:8px;"><br><br>
+        <input type="file" id="image" accept="image/*"><br><br>
+        <button type="submit" class="btn">Update Book</button>
+      </form>
+    </section>
+  </main>
+
+  <footer>
+    <p>© 2025 Book Manager | All Rights Reserved</p>
+  </footer>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const bookId = urlParams.get("id");
+
+    // Fetch the book details by ID
+    async function loadBook() {
+      try {
+        const res = await fetch(`/api/books/get/${bookId}`);
+        const result = await res.json();
+
+        if (result.success && result.data) {
+        const book = result.data;
+        document.getElementById("title").value = book.title;
+document.getElementById("author").value = book.author;
+document.getElementById("year").value = book.year;
+document.getElementById("price").value = book.price || "";
+document.getElementById("previewImage").src = `/uploads/${book.image}`;
+
+}
+ else {
+          alert("Book not found!");
+        }
+      } catch (err) {
+        console.error("Error fetching book:", err);
+        alert("Error fetching book details.");
+      }
+    }
+
+    // Handle the update form
+    document.getElementById("updateBookForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const formData = new FormData();
+  formData.append("title", document.getElementById("title").value);
+formData.append("author", document.getElementById("author").value);
+formData.append("year", document.getElementById("year").value);
+formData.append("price", document.getElementById("price").value);
+
+
+  const imageFile = document.getElementById("image").files[0];
+  if (imageFile) {
+    formData.append("image", imageFile);
+  }
+
+  try {
+    const res = await fetch(`/api/books/update/${bookId}`, {
+      method: "PUT",
+      body: formData
+    });
+
+    const result = await res.json();
+
+    if (result.success) {
+      alert("✅ Book updated successfully!");
+      window.location.href = "index.html";
+    } else {
+      alert("❌ Failed to update book.");
+    }
+  } catch (err) {
+    console.error("Error updating book:", err);
+    alert("Error while updating book.");
+  }
+});
+
+    loadBook();
+  </script>
+</body>
+</html>
